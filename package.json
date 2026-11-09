@@ -1,0 +1,12 @@
+{
+  "name": "codeforces-video-solutions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Tampermonkey userscript for discovering YouTube walkthroughs on Codeforces.",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check codeforces-video-solutions.user.js",
+    "start": "node scripts/serve.mjs"
+  },
+  "license": "MIT"
+}
