@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Codeforces Video Solutions
 // @namespace    https://github.com/suraj-xd/codeforces-video-solutions
-// @version      1.0.0
+// @version      1.0.1
 // @description  YouTube walkthroughs beside Codeforces problems, with a player, refresh, and a home-page library.
 // @author       suraj-xd
 // @license      MIT
@@ -22,7 +22,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
   const CACHE_TTL = 6 * 60 * 60 * 1000;
   const STORAGE_KEY = 'cf-video-solutions-v1';
   const HOST_ID = 'cf-video-solutions';
@@ -260,14 +260,20 @@
     const dialogSelect = el('select', { 'aria-label': 'Choose another walkthrough' });
     const external = el('a', { target: '_blank', rel: 'noopener noreferrer' }, 'Watch on YouTube ↗');
     const dialog = el('dialog', { 'aria-labelledby': 'dialog-title' },
-      el('div', { className: 'dialog-head' }, dialogTitle, el('button', { type: 'button', onclick: () => dialog.close(), 'aria-label': 'Close video dialog' }, '✕')),
+      el('div', { className: 'dialog-head' }, dialogTitle, el('button', { type: 'button', onclick: closePlayer, 'aria-label': 'Close video dialog' }, '✕')),
       el('div', { className: 'dialog-body' }, playerSlot, el('label', { for: 'dialog-select' }, 'Other walkthroughs'), dialogSelect,
         el('div', { className: 'dialog-foot' }, external, el('span', { className: 'subtle' }, 'If playback is unavailable here, open YouTube.'))));
     dialogSelect.id = 'dialog-select';
+    function closePlayer() {
+      // Stop playback immediately, even when a background tab delays close events.
+      playerSlot.replaceChildren();
+      if (dialog.open) dialog.close();
+    }
+    dialog.addEventListener('cancel', (event) => { event.preventDefault(); closePlayer(); });
     dialog.addEventListener('close', () => playerSlot.replaceChildren());
     dialog.addEventListener('click', (e) => {
       const r = dialog.getBoundingClientRect();
-      if (e.target === dialog && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) dialog.close();
+      if (e.target === dialog && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) closePlayer();
     });
     root.append(dialog);
 
@@ -314,7 +320,7 @@
     async function load(force = false) {
       if (!current) return;
       const p = { ...current }, key = cacheKey(p), version = ++requestVersion;
-      if (dialog.open) dialog.close();
+      closePlayer();
       loadedKey = key;
       context.textContent = `${p.id} · ${p.title || 'Codeforces problem'}`;
       searchLink.href = searchUrl(p);
@@ -369,7 +375,7 @@
         loadedKey = '';
         current = null;
         currentVideos = [];
-        if (dialog.open) dialog.close();
+        closePlayer();
         details.open = false;
         results.replaceChildren();
         status.textContent = '';

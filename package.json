@@ -1,6 +1,6 @@
 {
   "name": "codeforces-video-solutions",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "A Tampermonkey userscript for discovering YouTube walkthroughs on Codeforces.",
   "scripts": {
